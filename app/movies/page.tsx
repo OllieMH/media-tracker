@@ -1,10 +1,18 @@
+'use client'
+
+import { useState } from 'react'
 import MovieSearch from '@/components/MovieSearch'
+import MediaList from '@/components/MediaList'
 
 export default function MoviesPage() {
+  const [refreshKey, setRefreshKey] = useState(0)
+
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold">Movies</h1>
-      <MovieSearch />
+      <MovieSearch onAdded={() => setRefreshKey((k) => k + 1)} />
+      <hr className="my-8 border-zinc-200 dark:border-zinc-800" />
+      <MediaList category="movie" refreshKey={refreshKey} />
     </div>
   )
 }

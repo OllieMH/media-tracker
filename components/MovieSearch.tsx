@@ -6,7 +6,11 @@ import { searchMovies, TMDB_IMAGE_BASE } from '@/lib/apiClients/tmdb'
 import { TmdbSearchResult } from '@/types/media'
 import { addMediaItem } from '@/lib/mediaService'
 
-export default function MovieSearch() {
+interface Props {
+  onAdded?: () => void
+}
+
+export default function MovieSearch({ onAdded }: Props) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<TmdbSearchResult[]>([])
   const [loading, setLoading] = useState(false)
@@ -48,6 +52,7 @@ export default function MovieSearch() {
         },
       })
       setAdded((prev) => new Set(prev).add(movie.id))
+      onAdded?.()
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to add item')
     }
