@@ -19,6 +19,15 @@ export interface MediaItem {
 
 export type NewMediaItem = Omit<MediaItem, 'id' | 'user_id' | 'created_at' | 'updated_at'>
 
+// Normalized result used by the generic search component
+export interface SearchResult {
+  id: string
+  title: string
+  subtitle: string | null  // year, author, etc.
+  coverUrl: string | null
+  metadata: Record<string, unknown>
+}
+
 // TMDB
 export interface TmdbSearchResult {
   id: number
