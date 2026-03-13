@@ -13,7 +13,7 @@ export default function GamesPage() {
   return (
     <ProtectedPage>
       <div>
-        <h1 className="mb-6 text-2xl font-semibold">Games</h1>
+        <h1 className="mb-6 text-2xl font-semibold text-forest-400">Games</h1>
         <MediaSearch
           category="game"
           searchFn={searchGames}

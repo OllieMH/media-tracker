@@ -13,7 +13,7 @@ export default function BooksPage() {
   return (
     <ProtectedPage>
       <div>
-        <h1 className="mb-6 text-2xl font-semibold">Books</h1>
+        <h1 className="mb-6 text-2xl font-semibold text-forest-400">Books</h1>
         <MediaSearch
           category="book"
           searchFn={searchBooks}

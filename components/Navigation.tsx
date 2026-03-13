@@ -22,7 +22,7 @@ export default function Navigation() {
     <nav className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex h-14 items-center gap-6">
-          <span className="flex-shrink-0 font-semibold text-zinc-900 dark:text-zinc-100">
+          <span className="flex-shrink-0 font-semibold text-forest-400">
             Media Tracker
           </span>
 
@@ -34,8 +34,8 @@ export default function Navigation() {
                 href={href}
                 className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
                   pathname === href
-                    ? 'bg-zinc-100 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+                    ? 'bg-forest-900/60 font-medium text-forest-400'
+                    : 'text-zinc-500 hover:text-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-100'
                 }`}
               >
                 {label}
@@ -53,8 +53,8 @@ export default function Navigation() {
                 href="/settings"
                 className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
                   pathname === '/settings'
-                    ? 'bg-zinc-100 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+                    ? 'bg-forest-900/60 font-medium text-forest-400'
+                    : 'text-zinc-500 hover:text-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-100'
                 }`}
               >
                 Settings
@@ -100,8 +100,8 @@ export default function Navigation() {
                 onClick={() => setMenuOpen(false)}
                 className={`rounded-md px-3 py-2 text-sm transition-colors ${
                   pathname === href
-                    ? 'bg-zinc-100 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+                    ? 'bg-forest-900/60 font-medium text-forest-400'
+                    : 'text-zinc-500 hover:text-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-100'
                 }`}
               >
                 {label}

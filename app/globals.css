@@ -13,8 +13,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  --color-forest-400: #7db894;
+  --color-forest-500: #5a9e6f;
+  --color-forest-600: #3d7a52;
+  --color-forest-900: #1a3326;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -13,7 +13,7 @@ export default function SeriesPage() {
   return (
     <ProtectedPage>
       <div>
-        <h1 className="mb-6 text-2xl font-semibold">Series</h1>
+        <h1 className="mb-6 text-2xl font-semibold text-forest-400">Series</h1>
         <MediaSearch
           category="series"
           searchFn={searchSeries}

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
+import { Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Navigation'
 import AuthProvider from '@/components/AuthProvider'
 import SettingsProvider from '@/components/SettingsProvider'
 
-const geist = Geist({ subsets: ['latin'] })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' })
 
 export const metadata: Metadata = {
   title: 'Media Tracker',
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: initScript }} />
       </head>
-      <body className={`${geist.className} bg-zinc-950 text-zinc-100 antialiased`}>
+      <body className={`${spaceGrotesk.variable} font-sans bg-zinc-950 text-zinc-100 antialiased`}>
         <AuthProvider>
           <SettingsProvider>
             <Navigation />

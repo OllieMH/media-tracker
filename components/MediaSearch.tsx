@@ -86,9 +86,9 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 					placeholder={placeholder ?? `Search for a ${category}...`}
-					className="flex-1 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-500"
+					className="flex-1 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm outline-none focus:border-forest-500 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-forest-500"
 				/>
-				<button type="submit" disabled={loading} className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
+				<button type="submit" disabled={loading} className="rounded-lg bg-forest-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-forest-500 disabled:opacity-50">
 					{loading ? "Searching..." : "Search"}
 				</button>
 			</form>
@@ -112,7 +112,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 				<div>
 					<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
 						{shown.map((result) => (
-							<div key={result.id} className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+							<div key={result.id} className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
 								{result.coverUrl ? (
 									<div className={`w-full overflow-hidden ${category === "game" ? "aspect-video" : "aspect-[2/3]"}`}>
 										<Image src={result.coverUrl} alt={result.title} width={300} height={category === "game" ? 169 : 450} className="w-full h-full object-cover" />
@@ -124,7 +124,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 									<p className="text-sm font-medium leading-tight">{result.title}</p>
 									{result.subtitle && <p className="mt-1 text-xs text-zinc-500">{result.subtitle}</p>}
 									{added.has(result.id) ? (
-										<p className="mt-2 text-center text-xs text-zinc-500">✓ Added</p>
+										<p className="mt-2 text-center text-xs font-medium text-forest-400">✓ Added</p>
 									) : (
 										<div className="mt-2 flex gap-1">
 											{(["backlog", "in_progress", "completed"] as MediaStatus[]).map((status) => (

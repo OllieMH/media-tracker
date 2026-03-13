@@ -73,7 +73,7 @@ export default function MediaDetailModal({ item, onClose, onUpdate }: Props) {
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
 			<div
-				className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl dark:bg-zinc-900"
+				className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl dark:bg-zinc-800"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<button

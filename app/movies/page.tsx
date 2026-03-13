@@ -12,7 +12,7 @@ export default function MoviesPage() {
   return (
     <ProtectedPage>
       <div>
-        <h1 className="mb-6 text-2xl font-semibold">Movies</h1>
+        <h1 className="mb-6 text-2xl font-semibold text-forest-400">Movies</h1>
         <MovieSearch onAdded={() => setRefreshKey((k) => k + 1)} />
         <hr className="my-8 border-zinc-200 dark:border-zinc-800" />
         <ErrorBoundary>

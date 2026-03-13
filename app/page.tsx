@@ -35,7 +35,7 @@ const statusLabel: Record<string, string> = {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
 	return (
-		<div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+		<div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-800">
 			<p className="text-sm text-zinc-500 dark:text-zinc-400">{label}</p>
 			<p className="mt-1 text-3xl font-semibold">{value}</p>
 		</div>
@@ -44,7 +44,7 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 
 function StatCardSkeleton() {
 	return (
-		<div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+		<div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-800">
 			<div className="h-4 w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 			<div className="mt-2 h-8 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 		</div>
@@ -168,7 +168,7 @@ export default function HomePage() {
 	return (
 		<ProtectedPage>
 			<div>
-				<h1 className="mb-2 text-2xl font-semibold">Dashboard</h1>
+				<h1 className="mb-2 text-2xl font-semibold text-forest-400">Dashboard</h1>
 				<p className="mb-8 text-zinc-500 dark:text-zinc-400">Track your media backlog across all categories.</p>
 
 				{/* Summary stats */}
@@ -194,7 +194,7 @@ export default function HomePage() {
 							<Link
 								key={href}
 								href={href}
-								className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-5 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
+								className="flex flex-col gap-3 rounded-xl border border-zinc-200 border-t-2 border-t-forest-600 bg-white p-5 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:border-t-forest-600 dark:bg-zinc-800 dark:hover:bg-zinc-700"
 							>
 								<div className="flex items-center gap-2">
 									<span className="text-2xl">{emoji}</span>
@@ -208,7 +208,7 @@ export default function HomePage() {
 									<div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-zinc-500 dark:text-zinc-400">
 										<span>{counts.total} total</span>
 										{counts.completed > 0 && (
-											<span className="text-green-600 dark:text-green-400">{counts.completed} done</span>
+											<span className="text-forest-500 dark:text-forest-400">{counts.completed} done</span>
 										)}
 										{counts.inProgress > 0 && (
 											<span className="text-blue-600 dark:text-blue-400">{counts.inProgress} active</span>
@@ -238,7 +238,7 @@ export default function HomePage() {
 								? Array.from({ length: 5 }).map((_, i) => (
 										<div
 											key={i}
-											className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+											className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-800"
 										>
 											<div className="h-14 w-10 shrink-0 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
 											<div className="flex-1 space-y-2">
@@ -251,7 +251,7 @@ export default function HomePage() {
 										<Link
 											key={item.id}
 											href={categoryRoute[item.category]}
-											className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+											className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
 										>
 											{item.cover_image_url ? (
 												<img
@@ -270,7 +270,7 @@ export default function HomePage() {
 												<span
 													className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
 														item.status === "completed"
-															? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+															? "bg-forest-900/50 text-forest-400"
 															: item.status === "in_progress"
 																? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
 																: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
