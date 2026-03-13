@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { MediaCategory, SearchResult } from '@/types/media'
-import { addMediaItem } from '@/lib/mediaService'
+import { addMediaItem, getMediaItems } from '@/lib/mediaService'
 import { SearchResultSkeleton } from './SkeletonCards'
 
 interface Props {
@@ -20,6 +20,14 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
   const [error, setError] = useState<string | null>(null)
   const [added, setAdded] = useState<Set<string>>(new Set())
   const [addError, setAddError] = useState<string | null>(null)
+  const [existingIds, setExistingIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    getMediaItems(category).then((items) => {
+      const ids = new Set(items.map((i) => i.api_id).filter(Boolean) as string[])
+      setExistingIds(ids)
+    })
+  }, [category])
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -49,6 +57,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
         metadata: result.metadata,
       })
       setAdded((prev) => new Set(prev).add(result.id))
+      setExistingIds((prev) => new Set(prev).add(result.id))
       onAdded?.()
     } catch (err) {
       setAddError(err instanceof Error ? err.message : 'Failed to add item')
@@ -87,7 +96,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 
       {!loading && results.length > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {results.map((result) => (
+          {results.filter((r) => !existingIds.has(r.id)).map((result) => (
             <div
               key={result.id}
               className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
