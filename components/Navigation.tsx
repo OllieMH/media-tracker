@@ -11,6 +11,7 @@ const links = [
   { href: '/series', label: 'Series' },
   { href: '/books', label: 'Books' },
   { href: '/games', label: 'Games' },
+  { href: '/settings', label: 'Settings' },
 ]
 
 export default function Navigation() {
@@ -46,7 +47,9 @@ export default function Navigation() {
           {/* Desktop user info */}
           {user && (
             <div className="hidden items-center gap-3 md:flex">
-              <span className="text-xs text-zinc-400">{user.email}</span>
+              <span className="text-xs text-zinc-400">
+                {(user.user_metadata?.display_name as string) || user.email}
+              </span>
               <button
                 onClick={signOut}
                 className="rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
@@ -98,7 +101,9 @@ export default function Navigation() {
             {user && (
               <>
                 <div className="my-2 border-t border-zinc-100 dark:border-zinc-800" />
-                <span className="px-3 text-xs text-zinc-400">{user.email}</span>
+                <span className="px-3 text-xs text-zinc-400">
+                  {(user.user_metadata?.display_name as string) || user.email}
+                </span>
                 <button
                   onClick={() => { setMenuOpen(false); signOut() }}
                   className="rounded-md px-3 py-2 text-left text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
