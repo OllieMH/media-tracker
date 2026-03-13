@@ -2,6 +2,41 @@ import { OpenLibrarySearchResponse, OpenLibraryDoc, SearchResult } from '@/types
 
 const BASE_URL = 'https://openlibrary.org'
 
+const KNOWN_GENRES = new Set([
+  'Fantasy', 'Epic fantasy', 'Dark fantasy', 'Urban fantasy',
+  'Science fiction', 'Hard science fiction', 'Space opera', 'Dystopian fiction', 'Cyberpunk',
+  'Horror', 'Gothic fiction',
+  'Mystery', 'Detective fiction', 'Noir fiction', 'Crime fiction',
+  'Thriller', 'Psychological thriller', 'Spy fiction',
+  'Romance', 'Historical romance', 'Paranormal romance',
+  'Historical fiction',
+  'Literary fiction', 'Contemporary fiction',
+  'Adventure', 'Action',
+  'Biography', 'Autobiography', 'Memoir',
+  'Self-help', 'Personal development',
+  'Non-fiction', 'True crime',
+  'Young adult fiction', 'Young adult', 'Children fiction', "Children's literature",
+  'Graphic novel', 'Comics',
+  'Short stories', 'Anthology',
+  'Philosophy', 'Religion', 'Spirituality',
+  'History', 'Politics', 'Economics',
+  'Science', 'Popular science', 'Mathematics',
+  'Travel', 'Nature', 'Environment',
+  'Poetry', 'Drama',
+])
+
+function matchGenres(subjects: string[]): string[] {
+  const results: string[] = []
+  for (const subject of subjects) {
+    const normalized = subject.trim()
+    if (KNOWN_GENRES.has(normalized)) {
+      results.push(normalized)
+      if (results.length === 5) break
+    }
+  }
+  return results
+}
+
 function normalize(doc: OpenLibraryDoc): SearchResult {
   return {
     id: doc.key,
@@ -18,7 +53,7 @@ function normalize(doc: OpenLibraryDoc): SearchResult {
     metadata: {
       authors: doc.author_name ?? [],
       first_publish_year: doc.first_publish_year,
-      genres: doc.subject?.slice(0, 5) ?? [],
+      genres: matchGenres(doc.subject ?? []),
     },
   }
 }
@@ -37,5 +72,5 @@ export async function fetchBookGenres(apiId: string): Promise<string[]> {
   const res = await fetch(`${BASE_URL}${apiId}.json`)
   if (!res.ok) return []
   const data: { subjects?: string[] } = await res.json()
-  return data.subjects?.slice(0, 5) ?? []
+  return matchGenres(data.subjects ?? [])
 }
