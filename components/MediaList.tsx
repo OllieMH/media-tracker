@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MediaCategory, MediaItem, MediaStatus } from "@/types/media";
-import { getMediaItems } from "@/lib/mediaService";
+import { getMediaItems, updateMediaItem } from "@/lib/mediaService";
+import { fetchGenres } from "@/lib/apiClients/tmdb";
 import MediaCard from "./MediaCard";
 import { MediaCardSkeleton } from "./SkeletonCards";
 
@@ -42,6 +43,7 @@ export default function MediaList({ category, refreshKey }: Props) {
 	const [error, setError] = useState<string | null>(null);
 	const [sort, setSort] = useState<SortOption>("newest");
 	const [collapsed, setCollapsed] = useState<Set<MediaStatus>>(new Set());
+	const [genreFilter, setGenreFilter] = useState<string | null>(null);
 	const [tick, setTick] = useState(0);
 
 	const triggerRefresh = useCallback(() => setTick((t) => t + 1), []);
@@ -52,6 +54,29 @@ export default function MediaList({ category, refreshKey }: Props) {
 			setError(null);
 			try {
 				const data = await getMediaItems(category);
+
+				if (category === "movie" || category === "series") {
+					const type = category === "movie" ? "movie" : "tv";
+					const missing = data.filter(
+						(i) => i.api_id && !Array.isArray(i.metadata?.genres)
+					);
+					if (missing.length > 0) {
+						await Promise.all(
+							missing.map(async (item) => {
+								try {
+									const genres = await fetchGenres(item.api_id!, type);
+									await updateMediaItem(item.id, {
+										metadata: { ...item.metadata, genres },
+									});
+									item.metadata = { ...item.metadata, genres };
+								} catch {
+									// silently skip if fetch fails for an individual item
+								}
+							})
+						);
+					}
+				}
+
 				setItems(data);
 			} catch (err) {
 				setError(err instanceof Error ? err.message : "Failed to load items.");
@@ -62,15 +87,29 @@ export default function MediaList({ category, refreshKey }: Props) {
 		fetchData();
 	}, [category, refreshKey, tick]);
 
+	const availableGenres = useMemo(() => {
+		if (category !== "movie" && category !== "series") return []
+		const set = new Set<string>()
+		for (const item of items) {
+			const genres = item.metadata?.genres
+			if (Array.isArray(genres)) genres.forEach((g: string) => set.add(g))
+		}
+		return Array.from(set).sort()
+	}, [items, category])
+
 	const sorted = useMemo(() => sortItems(items, sort), [items, sort]);
+
+	const filtered = useMemo(() =>
+		genreFilter ? sorted.filter((i) => (i.metadata?.genres as string[] | undefined)?.includes(genreFilter)) : sorted,
+	[sorted, genreFilter])
 
 	const groups = useMemo(() =>
 		statusGroups.map(({ key, label }) => ({
 			key,
 			label,
-			items: sorted.filter((i) => i.status === key),
+			items: filtered.filter((i) => i.status === key),
 		})),
-	[sorted]);
+	[filtered]);
 
 	function toggleCollapse(key: MediaStatus) {
 		setCollapsed((prev) => {
@@ -127,8 +166,25 @@ export default function MediaList({ category, refreshKey }: Props) {
 
 	return (
 		<div>
-			<div className="mb-6 flex justify-end">
-				<select aria-label="Sort by" value={sort} onChange={(e) => setSort(e.target.value as SortOption)} className="rounded border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800">
+			<div className="mb-6 flex items-start justify-between gap-4">
+				{availableGenres.length > 0 ? (
+					<div className="flex flex-wrap gap-1.5">
+						{availableGenres.map((genre) => (
+							<button
+								key={genre}
+								onClick={() => setGenreFilter(genreFilter === genre ? null : genre)}
+								className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+									genreFilter === genre
+										? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+										: "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-500"
+								}`}
+							>
+								{genre}
+							</button>
+						))}
+					</div>
+				) : <div />}
+				<select aria-label="Sort by" value={sort} onChange={(e) => setSort(e.target.value as SortOption)} className="shrink-0 rounded border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800">
 					<option value="newest">Newest first</option>
 					<option value="oldest">Oldest first</option>
 					<option value="title">Title (A–Z)</option>

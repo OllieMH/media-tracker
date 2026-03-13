@@ -11,7 +11,26 @@ async function tmdbFetch<T>(path: string): Promise<T> {
   return res.json()
 }
 
-function normalizeMovie(m: TmdbSearchResult): SearchResult {
+const genreCache: { movie: Map<number, string>; tv: Map<number, string> } = {
+  movie: new Map(),
+  tv: new Map(),
+}
+
+async function getGenreMap(type: 'movie' | 'tv'): Promise<Map<number, string>> {
+  if (genreCache[type].size > 0) return genreCache[type]
+  const data = await tmdbFetch<{ genres: { id: number; name: string }[] }>(
+    `/genre/${type}/list?language=en`
+  )
+  const map = new Map(data.genres.map((g) => [g.id, g.name]))
+  genreCache[type] = map
+  return map
+}
+
+function resolveGenres(ids: number[], map: Map<number, string>): string[] {
+  return ids.map((id) => map.get(id)).filter(Boolean) as string[]
+}
+
+function normalizeMovie(m: TmdbSearchResult, genreMap: Map<number, string>): SearchResult {
   return {
     id: String(m.id),
     title: m.title ?? 'Untitled',
@@ -21,11 +40,12 @@ function normalizeMovie(m: TmdbSearchResult): SearchResult {
       overview: m.overview,
       release_date: m.release_date,
       vote_average: m.vote_average,
+      genres: resolveGenres(m.genre_ids, genreMap),
     },
   }
 }
 
-function normalizeSeries(m: TmdbSearchResult): SearchResult {
+function normalizeSeries(m: TmdbSearchResult, genreMap: Map<number, string>): SearchResult {
   return {
     id: String(m.id),
     title: m.name ?? 'Untitled',
@@ -35,22 +55,32 @@ function normalizeSeries(m: TmdbSearchResult): SearchResult {
       overview: m.overview,
       first_air_date: m.first_air_date,
       vote_average: m.vote_average,
+      genres: resolveGenres(m.genre_ids, genreMap),
     },
   }
 }
 
 export async function searchMovies(query: string): Promise<SearchResult[]> {
   if (!query.trim()) return []
-  const data = await tmdbFetch<TmdbSearchResponse>(
-    `/search/movie?query=${encodeURIComponent(query)}`
+  const [data, genreMap] = await Promise.all([
+    tmdbFetch<TmdbSearchResponse>(`/search/movie?query=${encodeURIComponent(query)}`),
+    getGenreMap('movie'),
+  ])
+  return data.results.map((m) => normalizeMovie(m, genreMap))
+}
+
+export async function fetchGenres(apiId: string, type: 'movie' | 'tv'): Promise<string[]> {
+  const data = await tmdbFetch<{ genres: { id: number; name: string }[] }>(
+    `/${type}/${apiId}?language=en`
   )
-  return data.results.map(normalizeMovie)
+  return data.genres.map((g) => g.name)
 }
 
 export async function searchSeries(query: string): Promise<SearchResult[]> {
   if (!query.trim()) return []
-  const data = await tmdbFetch<TmdbSearchResponse>(
-    `/search/tv?query=${encodeURIComponent(query)}`
-  )
-  return data.results.map(normalizeSeries)
+  const [data, genreMap] = await Promise.all([
+    tmdbFetch<TmdbSearchResponse>(`/search/tv?query=${encodeURIComponent(query)}`),
+    getGenreMap('tv'),
+  ])
+  return data.results.map((m) => normalizeSeries(m, genreMap))
 }

@@ -21,6 +21,8 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 	const [added, setAdded] = useState<Set<string>>(new Set());
 	const [addError, setAddError] = useState<string | null>(null);
 	const [existingIds, setExistingIds] = useState<Set<string>>(new Set());
+	const [searched, setSearched] = useState(false);
+	const [expanded, setExpanded] = useState(false);
 
 	useEffect(() => {
 		getMediaItems(category).then((items) => {
@@ -34,13 +36,22 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 		if (!query.trim()) return;
 		setLoading(true);
 		setError(null);
+		setExpanded(false);
 		try {
 			setResults(await searchFn(query));
+			setSearched(true);
 		} catch {
 			setError("Failed to fetch results.");
 		} finally {
 			setLoading(false);
 		}
+	}
+
+	function handleClose() {
+		setResults([]);
+		setSearched(false);
+		setExpanded(false);
+		setAdded(new Set());
 	}
 
 	async function handleAdd(result: SearchResult, status: MediaStatus) {
@@ -63,6 +74,9 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 			setAddError(err instanceof Error ? err.message : "Failed to add item");
 		}
 	}
+
+	const visible = results.filter((r) => !existingIds.has(r.id));
+	const shown = expanded ? visible : visible.slice(0, 5);
 
 	return (
 		<div>
@@ -90,11 +104,14 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 				</div>
 			)}
 
-			{!loading && results.length > 0 && (
-				<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-					{results
-						.filter((r) => !existingIds.has(r.id))
-						.map((result) => (
+			{!loading && searched && visible.length === 0 && (
+				<p className="text-sm text-zinc-500">No results found.</p>
+			)}
+
+			{!loading && visible.length > 0 && (
+				<div>
+					<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+						{shown.map((result) => (
 							<div key={result.id} className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
 								{result.coverUrl ? (
 									<div className={`w-full overflow-hidden ${category === "game" ? "aspect-video" : "aspect-[2/3]"}`}>
@@ -125,10 +142,19 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 								</div>
 							</div>
 						))}
+					</div>
+					<div className="mt-3 flex items-center gap-4">
+						{visible.length > 5 && (
+							<button onClick={() => setExpanded((e) => !e)} className="text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+								{expanded ? "Show less" : `Show all ${visible.length} results`}
+							</button>
+						)}
+						<button onClick={handleClose} className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+							Close
+						</button>
+					</div>
 				</div>
 			)}
-
-			{!loading && results.length === 0 && query && <p className="text-sm text-zinc-500">No results found.</p>}
 		</div>
 	);
 }
