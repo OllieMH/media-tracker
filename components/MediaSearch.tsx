@@ -93,15 +93,17 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
               className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
             >
               {result.coverUrl ? (
-                <Image
-                  src={result.coverUrl}
-                  alt={result.title}
-                  width={300}
-                  height={450}
-                  className="w-full object-cover"
-                />
+                <div className={`w-full overflow-hidden ${category === 'game' ? 'aspect-video' : 'aspect-[2/3]'}`}>
+                  <Image
+                    src={result.coverUrl}
+                    alt={result.title}
+                    width={300}
+                    height={category === 'game' ? 169 : 450}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               ) : (
-                <div className="flex h-48 items-center justify-center bg-zinc-100 text-sm text-zinc-400 dark:bg-zinc-800">
+                <div className={`flex w-full items-center justify-center bg-zinc-100 text-sm text-zinc-400 dark:bg-zinc-800 ${category === 'game' ? 'aspect-video' : 'aspect-[2/3]'}`}>
                   No image
                 </div>
               )}

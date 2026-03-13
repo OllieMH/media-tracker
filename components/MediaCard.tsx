@@ -58,9 +58,15 @@ export default function MediaCard({ item, onUpdate }: Props) {
 		<>
 			<div className="flex gap-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
 				{item.cover_image_url ? (
-					<Image src={item.cover_image_url} alt={item.title} width={100} height={100} className="rounded object-cover flex-shrink-0" />
+					<Image
+						src={item.cover_image_url}
+						alt={item.title}
+						width={item.category === 'game' ? 120 : 60}
+						height={item.category === 'game' ? 68 : 90}
+						className="rounded object-cover flex-shrink-0"
+					/>
 				) : (
-					<div className="flex h-[90px] w-[60px] flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800">No img</div>
+					<div className={`flex flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800 ${item.category === 'game' ? 'w-[120px] h-[68px]' : 'w-[60px] h-[90px]'}`}>No img</div>
 				)}
 				<div className="flex flex-1 flex-col gap-2 min-w-0">
 					<button onClick={() => setShowDetail(true)} className="text-left font-medium leading-tight truncate hover:underline">

@@ -40,9 +40,15 @@ export default function MediaDetailModal({ item, onClose }: Props) {
 
 				<div className="flex flex-col gap-4 sm:flex-row">
 					{item.cover_image_url ? (
-						<Image src={item.cover_image_url} alt={item.title} width={100} height={150} className="rounded object-cover flex-shrink-0" />
+						<Image
+							src={item.cover_image_url}
+							alt={item.title}
+							width={item.category === 'game' ? 240 : 100}
+							height={item.category === 'game' ? 135 : 150}
+							className="rounded object-cover flex-shrink-0"
+						/>
 					) : (
-						<div className="flex h-[150px] w-[100px] flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800">
+						<div className={`flex flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800 ${item.category === 'game' ? 'w-[240px] h-[135px]' : 'w-[100px] h-[150px]'}`}>
 							No image
 						</div>
 					)}
