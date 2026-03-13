@@ -58,15 +58,12 @@ export default function MediaCard({ item, onUpdate }: Props) {
 		<>
 			<div className="flex gap-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
 				{item.cover_image_url ? (
-					<Image src={item.cover_image_url} alt={item.title} width={60} height={90} className="rounded object-cover flex-shrink-0" />
+					<Image src={item.cover_image_url} alt={item.title} width={100} height={100} className="rounded object-cover flex-shrink-0" />
 				) : (
 					<div className="flex h-[90px] w-[60px] flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800">No img</div>
 				)}
 				<div className="flex flex-1 flex-col gap-2 min-w-0">
-					<button
-						onClick={() => setShowDetail(true)}
-						className="text-left font-medium leading-tight truncate hover:underline"
-					>
+					<button onClick={() => setShowDetail(true)} className="text-left font-medium leading-tight truncate hover:underline">
 						{item.title}
 					</button>
 					<select
@@ -83,20 +80,13 @@ export default function MediaCard({ item, onUpdate }: Props) {
 					</select>
 					<div className="flex items-center gap-1">
 						{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-							<button
-								key={n}
-								onClick={() => handleRatingChange(n)}
-								className={`text-xs ${item.rating && n <= item.rating ? "text-amber-400" : "text-zinc-300 dark:text-zinc-600"}`}
-							>
+							<button key={n} onClick={() => handleRatingChange(n)} className={`text-xs ${item.rating && n <= item.rating ? "text-amber-400" : "text-zinc-300 dark:text-zinc-600"}`}>
 								★
 							</button>
 						))}
 					</div>
 
-					<button
-						onClick={() => setShowNotes((v) => !v)}
-						className="self-start text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-					>
+					<button onClick={() => setShowNotes((v) => !v)} className="self-start text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
 						{showNotes ? "Hide notes" : notes ? "Notes ✎" : "Add notes"}
 					</button>
 
@@ -119,9 +109,7 @@ export default function MediaCard({ item, onUpdate }: Props) {
 				</div>
 			</div>
 
-			{showDetail && (
-				<MediaDetailModal item={{ ...item, notes: notes || null }} onClose={() => setShowDetail(false)} />
-			)}
+			{showDetail && <MediaDetailModal item={{ ...item, notes: notes || null }} onClose={() => setShowDetail(false)} />}
 		</>
 	);
 }
