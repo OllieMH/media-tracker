@@ -4,6 +4,8 @@ A full-stack web app for tracking your backlog of movies, TV series, books, and 
 
 Built as a portfolio project to learn React, Next.js, TypeScript, and Supabase.
 
+**Live site: [media.omhille.no](https://media.omhille.no)**
+
 ## Features
 
 - **4 media categories** — Movies, TV Series, Books, Games
