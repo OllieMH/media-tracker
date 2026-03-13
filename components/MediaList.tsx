@@ -40,8 +40,8 @@ export default function MediaList({ category, refreshKey }: Props) {
 	const [items, setItems] = useState<MediaItem[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [statusFilter, setStatusFilter] = useState<MediaStatus | "all">("all");
 	const [sort, setSort] = useState<SortOption>("newest");
+	const [collapsed, setCollapsed] = useState<Set<MediaStatus>>(new Set());
 	const [tick, setTick] = useState(0);
 
 	const triggerRefresh = useCallback(() => setTick((t) => t + 1), []);
@@ -64,16 +64,21 @@ export default function MediaList({ category, refreshKey }: Props) {
 
 	const sorted = useMemo(() => sortItems(items, sort), [items, sort]);
 
-	const groups = useMemo(() => {
-		if (statusFilter !== "all") {
-			return [{ key: statusFilter, label: statusGroups.find((g) => g.key === statusFilter)!.label, items: sorted.filter((i) => i.status === statusFilter) }];
-		}
-		return statusGroups.map(({ key, label }) => ({
+	const groups = useMemo(() =>
+		statusGroups.map(({ key, label }) => ({
 			key,
 			label,
 			items: sorted.filter((i) => i.status === key),
-		}));
-	}, [sorted, statusFilter]);
+		})),
+	[sorted]);
+
+	function toggleCollapse(key: MediaStatus) {
+		setCollapsed((prev) => {
+			const next = new Set(prev);
+			next.has(key) ? next.delete(key) : next.add(key);
+			return next;
+		});
+	}
 
 	const gridClass = category === "game"
 		? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
@@ -122,19 +127,7 @@ export default function MediaList({ category, refreshKey }: Props) {
 
 	return (
 		<div>
-			<div className="mb-6 flex flex-wrap gap-3">
-				<select
-					aria-label="Filter by status"
-					value={statusFilter}
-					onChange={(e) => setStatusFilter(e.target.value as MediaStatus | "all")}
-					className="rounded border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800"
-				>
-					<option value="all">All statuses</option>
-					<option value="in_progress">In Progress</option>
-					<option value="backlog">Backlog</option>
-					<option value="completed">Completed</option>
-				</select>
-
+			<div className="mb-6 flex justify-end">
 				<select aria-label="Sort by" value={sort} onChange={(e) => setSort(e.target.value as SortOption)} className="rounded border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800">
 					<option value="newest">Newest first</option>
 					<option value="oldest">Oldest first</option>
@@ -148,12 +141,21 @@ export default function MediaList({ category, refreshKey }: Props) {
 				{groups.map(({ key, label, items: groupItems }) =>
 					groupItems.length === 0 ? null : (
 						<div key={key}>
-							<h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">{label}</h3>
-							<div className={gridClass}>
-								{groupItems.map((item) => (
-									<MediaCard key={item.id} item={item} onUpdate={triggerRefresh} />
-								))}
-							</div>
+							<button
+								onClick={() => toggleCollapse(key)}
+								className="mb-3 flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+							>
+								<span>{collapsed.has(key) ? "▶" : "▼"}</span>
+								{label}
+								<span className="ml-1 text-xs font-normal normal-case tracking-normal">({groupItems.length})</span>
+							</button>
+							{!collapsed.has(key) && (
+								<div className={gridClass}>
+									{groupItems.map((item) => (
+										<MediaCard key={item.id} item={item} onUpdate={triggerRefresh} />
+									))}
+								</div>
+							)}
 						</div>
 					),
 				)}
