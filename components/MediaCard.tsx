@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { MediaItem, MediaStatus } from "@/types/media";
 import { updateMediaItem, deleteMediaItem } from "@/lib/mediaService";
 import MediaDetailModal from "./MediaDetailModal";
@@ -18,16 +18,7 @@ interface Props {
 }
 
 export default function MediaCard({ item, onUpdate }: Props) {
-	const [notes, setNotes] = useState(item.notes ?? "");
-	const [showNotes, setShowNotes] = useState(false);
 	const [showDetail, setShowDetail] = useState(false);
-	const [saving, setSaving] = useState(false);
-	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-	// Sync notes if the item is refreshed from outside (e.g. after onUpdate)
-	useEffect(() => {
-		setNotes(item.notes ?? "");
-	}, [item.notes]);
 
 	async function handleStatusChange(status: MediaStatus) {
 		await updateMediaItem(item.id, { status });
@@ -44,78 +35,74 @@ export default function MediaCard({ item, onUpdate }: Props) {
 		onUpdate();
 	}
 
-	function handleNotesChange(value: string) {
-		setNotes(value);
-		setSaving(true);
-		if (debounceRef.current) clearTimeout(debounceRef.current);
-		debounceRef.current = setTimeout(async () => {
-			await updateMediaItem(item.id, { notes: value });
-			setSaving(false);
-		}, 800);
-	}
+	const isGame = item.category === "game";
 
 	return (
 		<>
-			<div className="flex gap-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+			<div
+				className={`relative group overflow-hidden rounded-lg cursor-pointer bg-zinc-100 dark:bg-zinc-800 ${isGame ? "aspect-video" : "aspect-[2/3]"}`}
+				onClick={() => setShowDetail(true)}
+			>
 				{item.cover_image_url ? (
 					<Image
 						src={item.cover_image_url}
 						alt={item.title}
-						width={item.category === 'game' ? 120 : 60}
-						height={item.category === 'game' ? 68 : 90}
-						className="rounded object-cover flex-shrink-0"
+						fill
+						className="object-cover"
+						sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
 					/>
 				) : (
-					<div className={`flex flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800 ${item.category === 'game' ? 'w-[120px] h-[68px]' : 'w-[60px] h-[90px]'}`}>No img</div>
+					<div className="flex h-full items-center justify-center text-xs text-zinc-400">No image</div>
 				)}
-				<div className="flex flex-1 flex-col gap-2 min-w-0">
-					<button onClick={() => setShowDetail(true)} className="text-left font-medium leading-tight truncate hover:underline">
-						{item.title}
-					</button>
-					<select
-						aria-label="Status"
-						value={item.status}
-						onChange={(e) => handleStatusChange(e.target.value as MediaStatus)}
-						className="w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-800"
-					>
-						{Object.entries(statusLabels).map(([value, label]) => (
-							<option key={value} value={value}>
-								{label}
-							</option>
-						))}
-					</select>
-					<div className="flex items-center gap-1">
-						{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-							<button key={n} onClick={() => handleRatingChange(n)} className={`text-xs ${item.rating && n <= item.rating ? "text-amber-400" : "text-zinc-300 dark:text-zinc-600"}`}>
-								★
-							</button>
-						))}
+
+				{/* Permanent bottom gradient + title */}
+				<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-3 pt-12 pointer-events-none">
+					<p className="text-sm font-medium text-white leading-tight line-clamp-2">{item.title}</p>
+				</div>
+
+				{/* Hover overlay */}
+				<div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-3">
+					<div className="flex items-start justify-between gap-2">
+						<p className="text-sm font-semibold text-white leading-tight line-clamp-3">{item.title}</p>
+						<button
+							onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+							className="flex-shrink-0 text-zinc-400 hover:text-red-400 transition-colors"
+							aria-label="Remove"
+						>
+							✕
+						</button>
 					</div>
 
-					<button onClick={() => setShowNotes((v) => !v)} className="self-start text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
-						{showNotes ? "Hide notes" : notes ? "Notes ✎" : "Add notes"}
-					</button>
-
-					{showNotes && (
-						<div className="flex flex-col gap-1">
-							<textarea
-								value={notes}
-								onChange={(e) => handleNotesChange(e.target.value)}
-								placeholder="Add your notes..."
-								rows={3}
-								className="w-full resize-none rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
-							/>
-							{saving && <span className="text-xs text-zinc-400">Saving...</span>}
+					<div className="flex flex-col gap-2">
+						<div className="flex gap-0.5">
+							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+								<button
+									key={n}
+									onClick={(e) => { e.stopPropagation(); handleRatingChange(n); }}
+									className={`text-xs leading-none ${item.rating && n <= item.rating ? "text-amber-400" : "text-zinc-600 hover:text-zinc-400"}`}
+								>
+									★
+								</button>
+							))}
 						</div>
-					)}
-
-					<button onClick={handleDelete} className="self-start text-xs text-zinc-400 hover:text-red-500">
-						Remove
-					</button>
+						<select
+							aria-label="Status"
+							value={item.status}
+							onClick={(e) => e.stopPropagation()}
+							onChange={(e) => { e.stopPropagation(); handleStatusChange(e.target.value as MediaStatus); }}
+							className="w-full rounded border border-zinc-600 bg-zinc-900/80 px-2 py-1 text-xs text-white"
+						>
+							{Object.entries(statusLabels).map(([value, label]) => (
+								<option key={value} value={value}>{label}</option>
+							))}
+						</select>
+					</div>
 				</div>
 			</div>
 
-			{showDetail && <MediaDetailModal item={{ ...item, notes: notes || null }} onClose={() => setShowDetail(false)} />}
+			{showDetail && (
+				<MediaDetailModal item={item} onClose={() => setShowDetail(false)} onUpdate={onUpdate} />
+			)}
 		</>
 	);
 }

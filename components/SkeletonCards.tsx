@@ -1,18 +1,7 @@
-// Skeleton placeholder for a saved MediaCard (horizontal layout)
+// Skeleton placeholder for a saved MediaCard (cover image card)
 export function MediaCardSkeleton() {
   return (
-    <div className="flex animate-pulse gap-3 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-      {/* Cover image placeholder */}
-      <div className="h-[90px] w-[60px] flex-shrink-0 rounded bg-zinc-200 dark:bg-zinc-700" />
-      <div className="flex flex-1 flex-col gap-2">
-        {/* Title */}
-        <div className="h-4 w-3/4 rounded bg-zinc-200 dark:bg-zinc-700" />
-        {/* Status dropdown */}
-        <div className="h-6 w-full rounded bg-zinc-200 dark:bg-zinc-700" />
-        {/* Rating stars */}
-        <div className="h-4 w-1/2 rounded bg-zinc-200 dark:bg-zinc-700" />
-      </div>
-    </div>
+    <div className="aspect-[2/3] animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-700" />
   );
 }
 

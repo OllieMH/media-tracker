@@ -1,11 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { MediaItem } from "@/types/media";
+import { useRef, useState } from "react";
+import { MediaItem, MediaStatus } from "@/types/media";
+import { updateMediaItem, deleteMediaItem } from "@/lib/mediaService";
 
 interface Props {
 	item: MediaItem;
 	onClose: () => void;
+	onUpdate: () => void;
 }
 
 function formatKey(key: string): string {
@@ -17,12 +20,50 @@ function formatKey(key: string): string {
 
 const HIDDEN_KEYS = new Set(["poster_path", "backdrop_path", "genre_ids", "id", "adult", "video", "original_language"]);
 
-export default function MediaDetailModal({ item, onClose }: Props) {
+const statusLabels: Record<MediaStatus, string> = {
+	backlog: "Backlog",
+	in_progress: "In Progress",
+	completed: "Completed",
+};
+
+export default function MediaDetailModal({ item, onClose, onUpdate }: Props) {
+	const [notes, setNotes] = useState(item.notes ?? "");
+	const [saving, setSaving] = useState(false);
+	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 	const metadataEntries = item.metadata
 		? Object.entries(item.metadata).filter(
 				([key, value]) => !HIDDEN_KEYS.has(key) && value !== null && value !== undefined && value !== "",
 			)
 		: [];
+
+	async function handleStatusChange(status: MediaStatus) {
+		await updateMediaItem(item.id, { status });
+		onUpdate();
+	}
+
+	async function handleRatingChange(rating: number) {
+		await updateMediaItem(item.id, { rating });
+		onUpdate();
+	}
+
+	async function handleDelete() {
+		await deleteMediaItem(item.id);
+		onUpdate();
+		onClose();
+	}
+
+	function handleNotesChange(value: string) {
+		setNotes(value);
+		setSaving(true);
+		if (debounceRef.current) clearTimeout(debounceRef.current);
+		debounceRef.current = setTimeout(async () => {
+			await updateMediaItem(item.id, { notes: value });
+			setSaving(false);
+		}, 800);
+	}
+
+	const isGame = item.category === "game";
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
@@ -43,41 +84,60 @@ export default function MediaDetailModal({ item, onClose }: Props) {
 						<Image
 							src={item.cover_image_url}
 							alt={item.title}
-							width={item.category === 'game' ? 240 : 100}
-							height={item.category === 'game' ? 135 : 150}
+							width={isGame ? 240 : 100}
+							height={isGame ? 135 : 150}
 							className="rounded object-cover flex-shrink-0"
 						/>
 					) : (
-						<div className={`flex flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800 ${item.category === 'game' ? 'w-[240px] h-[135px]' : 'w-[100px] h-[150px]'}`}>
+						<div className={`flex flex-shrink-0 items-center justify-center rounded bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800 ${isGame ? "w-[240px] h-[135px]" : "w-[100px] h-[150px]"}`}>
 							No image
 						</div>
 					)}
-					<div className="flex flex-col gap-2 min-w-0">
-						<h2 className="text-lg font-semibold leading-tight">{item.title}</h2>
+					<div className="flex flex-col gap-3 min-w-0 flex-1">
+						<h2 className="text-lg font-semibold leading-tight pr-6">{item.title}</h2>
 						<span className="w-fit rounded-full bg-zinc-100 px-2 py-0.5 text-xs capitalize text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
 							{item.category}
 						</span>
-						<p className="text-sm text-zinc-500">
-							Status:{" "}
-							<span className="capitalize text-zinc-700 dark:text-zinc-300">
-								{item.status.replace("_", " ")}
-							</span>
-						</p>
-						{item.rating && (
-							<p className="text-sm text-zinc-500">
-								Rating:{" "}
-								<span className="text-amber-500">
-									{"★".repeat(item.rating)}
-									<span className="text-zinc-300 dark:text-zinc-600">{"★".repeat(10 - item.rating)}</span>
-								</span>{" "}
-								<span className="text-zinc-700 dark:text-zinc-300">({item.rating}/10)</span>
-							</p>
-						)}
+
+						<select
+							aria-label="Status"
+							value={item.status}
+							onChange={(e) => handleStatusChange(e.target.value as MediaStatus)}
+							className="rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+						>
+							{Object.entries(statusLabels).map(([value, label]) => (
+								<option key={value} value={value}>{label}</option>
+							))}
+						</select>
+
+						<div className="flex items-center gap-0.5">
+							{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+								<button
+									key={n}
+									onClick={() => handleRatingChange(n)}
+									className={`text-base ${item.rating && n <= item.rating ? "text-amber-400" : "text-zinc-300 dark:text-zinc-600"}`}
+								>
+									★
+								</button>
+							))}
+						</div>
 					</div>
 				</div>
 
+				<div className="mt-5">
+					<h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500">Notes</h3>
+					<textarea
+						value={notes}
+						onChange={(e) => handleNotesChange(e.target.value)}
+						placeholder="Add your notes..."
+						rows={3}
+						className="w-full resize-none rounded border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+					/>
+					{saving && <span className="text-xs text-zinc-400">Saving...</span>}
+				</div>
+
 				{metadataEntries.length > 0 && (
-					<div className="mt-6">
+					<div className="mt-5">
 						<h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Details</h3>
 						<dl className="space-y-2">
 							{metadataEntries.map(([key, value]) => (
@@ -96,12 +156,12 @@ export default function MediaDetailModal({ item, onClose }: Props) {
 					</div>
 				)}
 
-				{item.notes && (
-					<div className="mt-6">
-						<h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500">Notes</h3>
-						<p className="whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300">{item.notes}</p>
-					</div>
-				)}
+				<button
+					onClick={handleDelete}
+					className="mt-6 text-xs text-zinc-400 hover:text-red-500 transition-colors"
+				>
+					Remove from list
+				</button>
 			</div>
 		</div>
 	);
