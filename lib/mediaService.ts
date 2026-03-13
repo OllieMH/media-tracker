@@ -2,9 +2,12 @@ import { supabase } from './supabase'
 import { MediaItem, NewMediaItem } from '@/types/media'
 
 export async function addMediaItem(item: NewMediaItem): Promise<MediaItem> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
   const { data, error } = await supabase
     .from('media_items')
-    .insert(item)
+    .insert({ ...item, user_id: user.id })
     .select()
     .single()
 
