@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { MediaCategory, SearchResult } from '@/types/media'
+import { MediaCategory, MediaStatus, SearchResult } from '@/types/media'
 import { addMediaItem, getMediaItems } from '@/lib/mediaService'
 import { SearchResultSkeleton } from './SkeletonCards'
 
@@ -21,6 +21,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
   const [added, setAdded] = useState<Set<string>>(new Set())
   const [addError, setAddError] = useState<string | null>(null)
   const [existingIds, setExistingIds] = useState<Set<string>>(new Set())
+  const [statusMap, setStatusMap] = useState<Record<string, MediaStatus>>({})
 
   useEffect(() => {
     getMediaItems(category).then((items) => {
@@ -45,11 +46,12 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 
   async function handleAdd(result: SearchResult) {
     setAddError(null)
+    const status = statusMap[result.id] ?? 'backlog'
     try {
       await addMediaItem({
         title: result.title,
         category,
-        status: 'backlog',
+        status,
         rating: null,
         notes: null,
         api_id: result.id,
@@ -121,13 +123,29 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
                 {result.subtitle && (
                   <p className="mt-1 text-xs text-zinc-500">{result.subtitle}</p>
                 )}
-                <button
-                  onClick={() => handleAdd(result)}
-                  disabled={added.has(result.id)}
-                  className="mt-2 w-full rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-                >
-                  {added.has(result.id) ? '✓ Added' : '+ Add to backlog'}
-                </button>
+                {added.has(result.id) ? (
+                  <p className="mt-2 text-center text-xs text-zinc-500">✓ Added</p>
+                ) : (
+                  <div className="mt-2 flex gap-1">
+                    <select
+                      value={statusMap[result.id] ?? 'backlog'}
+                      onChange={(e) =>
+                        setStatusMap((prev) => ({ ...prev, [result.id]: e.target.value as MediaStatus }))
+                      }
+                      className="flex-1 min-w-0 rounded-md border border-zinc-200 bg-white px-1 py-1.5 text-xs outline-none dark:border-zinc-700 dark:bg-zinc-800"
+                    >
+                      <option value="backlog">Backlog</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                    <button
+                      onClick={() => handleAdd(result)}
+                      className="rounded-md bg-zinc-900 px-2 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
