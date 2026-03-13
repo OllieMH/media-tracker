@@ -18,7 +18,7 @@ function formatKey(key: string): string {
 		.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const HIDDEN_KEYS = new Set(["poster_path", "backdrop_path", "genre_ids", "id", "adult", "video", "original_language"]);
+const HIDDEN_KEYS = new Set(["poster_path", "backdrop_path", "genre_ids", "id", "adult", "video", "original_language", "genres_v", "genres_curated"]);
 
 const statusLabels: Record<MediaStatus, string> = {
 	backlog: "Backlog",
