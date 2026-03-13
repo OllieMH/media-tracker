@@ -29,7 +29,7 @@ export async function getMediaItems(category?: string): Promise<MediaItem[]> {
 
 export async function updateMediaItem(
   id: string,
-  updates: Partial<Pick<MediaItem, 'status' | 'rating' | 'notes' | 'metadata'>>
+  updates: Partial<Pick<MediaItem, 'status' | 'rating' | 'notes' | 'metadata' | 'is_favorite'>>
 ): Promise<void> {
   const { error } = await supabase
     .from('media_items')

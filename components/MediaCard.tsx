@@ -35,6 +35,12 @@ export default function MediaCard({ item, onUpdate }: Props) {
 		onUpdate();
 	}
 
+	async function handleToggleFavorite(e: React.MouseEvent) {
+		e.stopPropagation();
+		await updateMediaItem(item.id, { is_favorite: !item.is_favorite });
+		onUpdate();
+	}
+
 	const isGame = item.category === "game";
 
 	return (
@@ -55,6 +61,15 @@ export default function MediaCard({ item, onUpdate }: Props) {
 					<div className="flex h-full items-center justify-center text-xs text-zinc-400">No image</div>
 				)}
 
+				{/* Persistent favourite badge */}
+				{item.is_favorite && (
+					<div className="absolute left-2 top-2 pointer-events-none text-rose-400 drop-shadow">
+						<svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l7.78-7.78a5.5 5.5 0 0 0 0-7.78z" />
+						</svg>
+					</div>
+				)}
+
 				{/* Permanent bottom gradient + title */}
 				<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-3 pt-12 pointer-events-none">
 					<p className="text-sm font-medium text-white leading-tight line-clamp-2">{item.title}</p>
@@ -64,13 +79,24 @@ export default function MediaCard({ item, onUpdate }: Props) {
 				<div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-3">
 					<div className="flex items-start justify-between gap-2">
 						<p className="text-sm font-semibold text-white leading-tight line-clamp-3">{item.title}</p>
-						<button
-							onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-							className="flex-shrink-0 text-zinc-400 hover:text-red-400 transition-colors"
-							aria-label="Remove"
-						>
-							✕
-						</button>
+						<div className="flex flex-shrink-0 items-center gap-2">
+							<button
+								onClick={handleToggleFavorite}
+								aria-label={item.is_favorite ? "Unfavourite" : "Favourite"}
+								className={`transition-colors ${item.is_favorite ? "text-rose-400" : "text-zinc-400 hover:text-rose-400"}`}
+							>
+								<svg viewBox="0 0 24 24" className="h-4 w-4" fill={item.is_favorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+									<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l7.78-7.78a5.5 5.5 0 0 0 0-7.78z" strokeLinecap="round" strokeLinejoin="round" />
+								</svg>
+							</button>
+							<button
+								onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+								className="text-zinc-400 hover:text-red-400 transition-colors"
+								aria-label="Remove"
+							>
+								✕
+							</button>
+						</div>
 					</div>
 
 					<div className="flex flex-col gap-2">

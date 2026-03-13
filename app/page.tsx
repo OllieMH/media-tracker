@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ProtectedPage from "@/components/ProtectedPage";
-import { getMediaItems } from "@/lib/mediaService";
+import { getMediaItems, updateMediaItem } from "@/lib/mediaService";
 import { MediaItem, MediaCategory } from "@/types/media";
 
 const categories: { href: string; label: string; emoji: string; category: MediaCategory }[] = [
@@ -51,16 +51,96 @@ function StatCardSkeleton() {
 	);
 }
 
+function FavouritesCarousel({ items, onUnfavourite }: { items: MediaItem[]; onUnfavourite: (id: string) => void }) {
+	const scrollRef = useRef<HTMLDivElement>(null);
+
+	function scroll(dir: "left" | "right") {
+		scrollRef.current?.scrollBy({ left: dir === "right" ? 260 : -260, behavior: "smooth" });
+	}
+
+	return (
+		<div className="flex items-center gap-2">
+			<button
+				onClick={() => scroll("left")}
+				className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+				aria-label="Scroll left"
+			>
+				<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4">
+					<path d="M12 5l-5 5 5 5" strokeLinecap="round" strokeLinejoin="round" />
+				</svg>
+			</button>
+
+			<div ref={scrollRef} className="scrollbar-hide flex-1 overflow-x-auto">
+			<div className="flex w-max mx-auto gap-3">
+				{items.map((item) => {
+					const isGame = item.category === "game";
+					return (
+					<div key={item.id} className={`group relative flex-shrink-0 ${isGame ? "" : "w-20"}`}>
+						<Link href={categoryRoute[item.category]}>
+							<div className={`relative overflow-hidden rounded-lg bg-zinc-800 ${isGame ? "aspect-video h-[7.5rem]" : "aspect-[2/3]"}`}>
+								{item.cover_image_url ? (
+									<img
+										src={item.cover_image_url}
+										alt={item.title}
+										className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+									/>
+								) : (
+									<div className="flex h-full items-center justify-center text-xl">
+										{categories.find((c) => c.category === item.category)?.emoji}
+									</div>
+								)}
+								<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 pt-5">
+									<p className="line-clamp-1 text-xs font-medium leading-tight text-white">{item.title}</p>
+								</div>
+							</div>
+						</Link>
+						<button
+							onClick={() => onUnfavourite(item.id)}
+							aria-label="Remove from favourites"
+							className="absolute right-1 top-1 rounded-full bg-black/50 p-1 text-rose-400 opacity-0 transition-opacity group-hover:opacity-100"
+						>
+							<svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
+								<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l7.78-7.78a5.5 5.5 0 0 0 0-7.78z" />
+							</svg>
+						</button>
+					</div>
+				);
+				})}
+			</div>
+			</div>
+
+			<button
+				onClick={() => scroll("right")}
+				className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+				aria-label="Scroll right"
+			>
+				<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4">
+					<path d="M8 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
+				</svg>
+			</button>
+		</div>
+	);
+}
+
 export default function HomePage() {
 	const [items, setItems] = useState<MediaItem[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
+	function fetchItems() {
 		getMediaItems()
 			.then(setItems)
 			.catch(() => {})
 			.finally(() => setLoading(false));
+	}
+
+	useEffect(() => {
+		fetchItems();
 	}, []);
+
+	async function handleUnfavourite(id: string) {
+		await updateMediaItem(id, { is_favorite: false });
+		fetchItems();
+	}
 
 	const total = items.length;
 	const completed = items.filter((i) => i.status === "completed").length;
@@ -80,6 +160,8 @@ export default function HomePage() {
 			backlog: cat.filter((i) => i.status === "backlog").length,
 		};
 	};
+
+	const favourites = items.filter((i) => i.is_favorite);
 
 	const recent = items.slice(0, 5);
 
@@ -138,6 +220,14 @@ export default function HomePage() {
 						);
 					})}
 				</div>
+
+				{/* Favourites */}
+				{!loading && favourites.length > 0 && (
+					<div className="mb-8">
+						<h2 className="mb-3 text-lg font-medium">Favourites</h2>
+						<FavouritesCarousel items={favourites} onUnfavourite={handleUnfavourite} />
+					</div>
+				)}
 
 				{/* Recently added */}
 				{(loading || recent.length > 0) && (

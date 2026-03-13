@@ -12,6 +12,7 @@ export interface MediaItem {
   notes: string | null
   api_id: string | null
   cover_image_url: string | null
+  is_favorite: boolean
   metadata: Record<string, unknown> | null
   created_at: string
   updated_at: string

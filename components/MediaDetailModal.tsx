@@ -53,6 +53,11 @@ export default function MediaDetailModal({ item, onClose, onUpdate }: Props) {
 		onClose();
 	}
 
+	async function handleToggleFavorite() {
+		await updateMediaItem(item.id, { is_favorite: !item.is_favorite });
+		onUpdate();
+	}
+
 	function handleNotesChange(value: string) {
 		setNotes(value);
 		setSaving(true);
@@ -94,7 +99,18 @@ export default function MediaDetailModal({ item, onClose, onUpdate }: Props) {
 						</div>
 					)}
 					<div className="flex flex-col gap-3 min-w-0 flex-1">
-						<h2 className="text-lg font-semibold leading-tight pr-6">{item.title}</h2>
+						<div className="flex items-start gap-2 pr-6">
+						<h2 className="flex-1 text-lg font-semibold leading-tight">{item.title}</h2>
+						<button
+							onClick={handleToggleFavorite}
+							aria-label={item.is_favorite ? "Unfavourite" : "Favourite"}
+							className={`flex-shrink-0 transition-colors ${item.is_favorite ? "text-rose-400" : "text-zinc-400 hover:text-rose-400"}`}
+						>
+							<svg viewBox="0 0 24 24" className="h-5 w-5" fill={item.is_favorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+								<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l7.78-7.78a5.5 5.5 0 0 0 0-7.78z" strokeLinecap="round" strokeLinejoin="round" />
+							</svg>
+						</button>
+					</div>
 						<span className="w-fit rounded-full bg-zinc-100 px-2 py-0.5 text-xs capitalize text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
 							{item.category}
 						</span>
