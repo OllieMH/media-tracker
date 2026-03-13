@@ -75,13 +75,17 @@ export default function MediaList({ category, refreshKey }: Props) {
 		}));
 	}, [sorted, statusFilter]);
 
+	const gridClass = category === "game"
+		? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+		: "grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
+
 	if (loading) {
 		return (
 			<div className="space-y-6">
 				{statusGroups.map(({ key, label }) => (
 					<div key={key}>
 						<div className="mb-3 h-4 w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
-						<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+						<div className={gridClass}>
 							{[1, 2, 3].map((n) => (
 								<MediaCardSkeleton key={n} />
 							))}
@@ -145,7 +149,7 @@ export default function MediaList({ category, refreshKey }: Props) {
 					groupItems.length === 0 ? null : (
 						<div key={key}>
 							<h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">{label}</h3>
-							<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+							<div className={gridClass}>
 								{groupItems.map((item) => (
 									<MediaCard key={item.id} item={item} onUpdate={triggerRefresh} />
 								))}
