@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import ProtectedPage from "@/components/ProtectedPage";
 import { useAuth } from "@/components/AuthProvider";
 import { useSettings, FontSize } from "@/components/SettingsProvider";
@@ -16,8 +17,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function SettingsPage() {
-	const { user } = useAuth();
+	const { user, signOut } = useAuth();
 	const { fontSize, setFontSize } = useSettings();
+	const router = useRouter();
 
 	// Display name
 	const [displayName, setDisplayName] = useState(
@@ -59,6 +61,33 @@ export default function SettingsPage() {
 			setConfirmPassword("");
 			setTimeout(() => setPasswordStatus("idle"), 2500);
 		}
+	}
+
+	// Delete account
+	const [deleteStep, setDeleteStep] = useState<"idle" | "confirming" | "deleting">("idle");
+	const [deleteError, setDeleteError] = useState("");
+
+	async function deleteAccount() {
+		setDeleteError("");
+		setDeleteStep("deleting");
+		const { data: { session } } = await supabase.auth.getSession();
+		if (!session) {
+			setDeleteError("Not authenticated.");
+			setDeleteStep("confirming");
+			return;
+		}
+		const res = await fetch("/api/delete-account", {
+			method: "DELETE",
+			headers: { Authorization: `Bearer ${session.access_token}` },
+		});
+		if (!res.ok) {
+			const body = await res.json();
+			setDeleteError(body.error ?? "Something went wrong.");
+			setDeleteStep("confirming");
+			return;
+		}
+		await signOut();
+		router.push("/login");
 	}
 
 	const fontSizeOptions: { value: FontSize; label: string; preview: string }[] = [
@@ -167,6 +196,47 @@ export default function SettingsPage() {
 							</button>
 						</div>
 					</Section>
+					{/* Danger zone */}
+					<div className="rounded-xl border border-red-900/50 bg-zinc-900 p-6">
+						<h2 className="mb-1 text-base font-semibold text-red-400">Danger zone</h2>
+						<p className="mb-5 text-sm text-zinc-400">
+							Permanently delete your account and all tracked media. This cannot be undone.
+						</p>
+
+						{deleteStep === "idle" && (
+							<button
+								onClick={() => setDeleteStep("confirming")}
+								className="rounded-lg border border-red-900/60 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-950/40"
+							>
+								Delete account
+							</button>
+						)}
+
+						{deleteStep === "confirming" && (
+							<div className="flex flex-col gap-3">
+								<p className="text-sm font-medium text-red-400">Are you sure? This is irreversible.</p>
+								{deleteError && <p className="text-xs text-red-500">{deleteError}</p>}
+								<div className="flex gap-2">
+									<button
+										onClick={deleteAccount}
+										className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+									>
+										Yes, delete my account
+									</button>
+									<button
+										onClick={() => { setDeleteStep("idle"); setDeleteError(""); }}
+										className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-400 transition-colors hover:border-zinc-600"
+									>
+										Cancel
+									</button>
+								</div>
+							</div>
+						)}
+
+						{deleteStep === "deleting" && (
+							<p className="text-sm text-zinc-400">Deleting account…</p>
+						)}
+					</div>
 				</div>
 			</div>
 		</ProtectedPage>

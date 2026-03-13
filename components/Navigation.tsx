@@ -11,7 +11,6 @@ const links = [
   { href: '/series', label: 'Series' },
   { href: '/books', label: 'Books' },
   { href: '/games', label: 'Games' },
-  { href: '/settings', label: 'Settings' },
 ]
 
 export default function Navigation() {
@@ -50,6 +49,16 @@ export default function Navigation() {
               <span className="text-xs text-zinc-400">
                 {(user.user_metadata?.display_name as string) || user.email}
               </span>
+              <Link
+                href="/settings"
+                className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
+                  pathname === '/settings'
+                    ? 'bg-zinc-100 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+                }`}
+              >
+                Settings
+              </Link>
               <button
                 onClick={signOut}
                 className="rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
@@ -104,6 +113,17 @@ export default function Navigation() {
                 <span className="px-3 text-xs text-zinc-400">
                   {(user.user_metadata?.display_name as string) || user.email}
                 </span>
+                <Link
+                  href="/settings"
+                  onClick={() => setMenuOpen(false)}
+                  className={`rounded-md px-3 py-2 text-sm transition-colors ${
+                    pathname === '/settings'
+                      ? 'bg-zinc-100 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
+                      : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+                  }`}
+                >
+                  Settings
+                </Link>
                 <button
                   onClick={() => { setMenuOpen(false); signOut() }}
                   className="rounded-md px-3 py-2 text-left text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
