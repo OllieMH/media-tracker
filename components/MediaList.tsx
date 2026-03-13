@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { MediaCategory, MediaItem, MediaStatus } from "@/types/media";
 import { getMediaItems, updateMediaItem } from "@/lib/mediaService";
 import { fetchGenres } from "@/lib/apiClients/tmdb";
+import { fetchGameGenres } from "@/lib/apiClients/steam";
+import { fetchBookGenres } from "@/lib/apiClients/openLibrary";
 import MediaCard from "./MediaCard";
 import { MediaCardSkeleton } from "./SkeletonCards";
 
@@ -55,26 +57,30 @@ export default function MediaList({ category, refreshKey }: Props) {
 			try {
 				const data = await getMediaItems(category);
 
-				if (category === "movie" || category === "series") {
-					const type = category === "movie" ? "movie" : "tv";
-					const missing = data.filter(
-						(i) => i.api_id && !Array.isArray(i.metadata?.genres)
-					);
-					if (missing.length > 0) {
-						await Promise.all(
-							missing.map(async (item) => {
-								try {
-									const genres = await fetchGenres(item.api_id!, type);
-									await updateMediaItem(item.id, {
-										metadata: { ...item.metadata, genres },
-									});
-									item.metadata = { ...item.metadata, genres };
-								} catch {
-									// silently skip if fetch fails for an individual item
+				const missing = data.filter(
+					(i) => i.api_id && !Array.isArray(i.metadata?.genres)
+				);
+				if (missing.length > 0) {
+					await Promise.all(
+						missing.map(async (item) => {
+							try {
+								let genres: string[] = []
+								if (category === "movie" || category === "series") {
+									genres = await fetchGenres(item.api_id!, category === "movie" ? "movie" : "tv")
+								} else if (category === "game") {
+									genres = await fetchGameGenres(item.api_id!)
+								} else if (category === "book") {
+									genres = await fetchBookGenres(item.api_id!)
 								}
-							})
-						);
-					}
+								await updateMediaItem(item.id, {
+									metadata: { ...item.metadata, genres },
+								});
+								item.metadata = { ...item.metadata, genres };
+							} catch {
+								// silently skip if fetch fails for an individual item
+							}
+						})
+					);
 				}
 
 				setItems(data);
@@ -88,14 +94,13 @@ export default function MediaList({ category, refreshKey }: Props) {
 	}, [category, refreshKey, tick]);
 
 	const availableGenres = useMemo(() => {
-		if (category !== "movie" && category !== "series") return []
 		const set = new Set<string>()
 		for (const item of items) {
 			const genres = item.metadata?.genres
 			if (Array.isArray(genres)) genres.forEach((g: string) => set.add(g))
 		}
 		return Array.from(set).sort()
-	}, [items, category])
+	}, [items])
 
 	const sorted = useMemo(() => sortItems(items, sort), [items, sort]);
 

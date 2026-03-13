@@ -14,6 +14,14 @@ function coverUrl(appId: number): string {
   return `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`
 }
 
+export async function fetchGameGenres(appId: string): Promise<string[]> {
+  const res = await fetch(`/api/games/details?appid=${appId}`)
+  if (!res.ok) return []
+  const data = await res.json()
+  const genres: { id: string; description: string }[] = data[appId]?.data?.genres ?? []
+  return genres.map((g) => g.description)
+}
+
 export async function searchGames(query: string): Promise<SearchResult[]> {
   if (!query.trim()) return []
   const res = await fetch(`/api/games/search?q=${encodeURIComponent(query)}`)

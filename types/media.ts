@@ -54,6 +54,7 @@ export interface OpenLibraryDoc {
   author_name?: string[]
   cover_i?: number
   first_publish_year?: number
+  subject?: string[]
 }
 
 export interface OpenLibrarySearchResponse {
