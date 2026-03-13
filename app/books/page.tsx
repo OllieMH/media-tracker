@@ -5,6 +5,7 @@ import MediaSearch from '@/components/MediaSearch'
 import MediaList from '@/components/MediaList'
 import { searchBooks } from '@/lib/apiClients/openLibrary'
 import ProtectedPage from '@/components/ProtectedPage'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 export default function BooksPage() {
   const [refreshKey, setRefreshKey] = useState(0)
@@ -20,7 +21,9 @@ export default function BooksPage() {
           onAdded={() => setRefreshKey((k) => k + 1)}
         />
         <hr className="my-8 border-zinc-200 dark:border-zinc-800" />
-        <MediaList category="book" refreshKey={refreshKey} />
+        <ErrorBoundary>
+          <MediaList category="book" refreshKey={refreshKey} />
+        </ErrorBoundary>
       </div>
     </ProtectedPage>
   )

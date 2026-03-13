@@ -5,6 +5,7 @@ import MediaSearch from '@/components/MediaSearch'
 import MediaList from '@/components/MediaList'
 import { searchGames } from '@/lib/apiClients/steam'
 import ProtectedPage from '@/components/ProtectedPage'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 export default function GamesPage() {
   const [refreshKey, setRefreshKey] = useState(0)
@@ -20,7 +21,9 @@ export default function GamesPage() {
           onAdded={() => setRefreshKey((k) => k + 1)}
         />
         <hr className="my-8 border-zinc-200 dark:border-zinc-800" />
-        <MediaList category="game" refreshKey={refreshKey} />
+        <ErrorBoundary>
+          <MediaList category="game" refreshKey={refreshKey} />
+        </ErrorBoundary>
       </div>
     </ProtectedPage>
   )
