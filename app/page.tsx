@@ -205,16 +205,16 @@ export default function HomePage() {
 								) : counts.total === 0 ? (
 									<p className="text-sm text-zinc-400">Nothing tracked yet</p>
 								) : (
-									<p className="truncate text-sm text-zinc-500 dark:text-zinc-400">
+									<div className="flex flex-col gap-0.5 text-sm text-zinc-500 dark:text-zinc-400">
 										<span>{counts.total} total</span>
 										{counts.completed > 0 && (
-											<span className="text-forest-500 dark:text-forest-400"> · {counts.completed} done</span>
+											<span className="text-forest-500 dark:text-forest-400">{counts.completed} done</span>
 										)}
 										{counts.inProgress > 0 && (
-											<span className="text-blue-600 dark:text-blue-400"> · {counts.inProgress} active</span>
+											<span className="text-blue-600 dark:text-blue-400">{counts.inProgress} active</span>
 										)}
-										{counts.backlog > 0 && <span> · {counts.backlog} backlog</span>}
-									</p>
+										{counts.backlog > 0 && <span>{counts.backlog} backlog</span>}
+									</div>
 								)}
 							</Link>
 						);
