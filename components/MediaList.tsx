@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { MediaCategory, MediaItem, MediaStatus } from "@/types/media";
 import { getMediaItems } from "@/lib/mediaService";
 import MediaCard from "./MediaCard";
+import { MediaCardSkeleton } from "./SkeletonCards";
 
 type SortOption = "newest" | "oldest" | "title" | "rating_high" | "rating_low";
 
@@ -67,7 +68,22 @@ export default function MediaList({ category, refreshKey }: Props) {
 		}));
 	}, [sorted, statusFilter]);
 
-	if (loading) return <p className="text-sm text-zinc-500">Loading...</p>;
+	if (loading) {
+		return (
+			<div className="space-y-6">
+				{statusGroups.map(({ key, label }) => (
+					<div key={key}>
+						<div className="mb-3 h-4 w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700" />
+						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+							{[1, 2, 3].map((n) => (
+								<MediaCardSkeleton key={n} />
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+		);
+	}
 	if (items.length === 0) return <p className="text-sm text-zinc-500">Nothing saved yet.</p>;
 
 	return (

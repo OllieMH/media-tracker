@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { MediaCategory, SearchResult } from '@/types/media'
 import { addMediaItem } from '@/lib/mediaService'
+import { SearchResultSkeleton } from './SkeletonCards'
 
 interface Props {
   category: MediaCategory
@@ -73,7 +74,15 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 
       {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
 
-      {results.length > 0 && (
+      {loading && (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <SearchResultSkeleton key={n} />
+          ))}
+        </div>
+      )}
+
+      {!loading && results.length > 0 && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {results.map((result) => (
             <div

@@ -38,7 +38,7 @@ export default function MediaDetailModal({ item, onClose }: Props) {
 					✕
 				</button>
 
-				<div className="flex gap-4">
+				<div className="flex flex-col gap-4 sm:flex-row">
 					{item.cover_image_url ? (
 						<Image src={item.cover_image_url} alt={item.title} width={100} height={150} className="rounded object-cover flex-shrink-0" />
 					) : (
