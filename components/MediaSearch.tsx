@@ -66,6 +66,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
 				api_id: result.id,
 				cover_image_url: result.coverUrl,
 				metadata: result.metadata,
+				is_favorite: false,
 			});
 			setAdded((prev) => new Set(prev).add(result.id));
 			setExistingIds((prev) => new Set(prev).add(result.id));
