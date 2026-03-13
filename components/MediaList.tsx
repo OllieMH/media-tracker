@@ -57,9 +57,11 @@ export default function MediaList({ category, refreshKey }: Props) {
 			try {
 				const data = await getMediaItems(category);
 
-				const missing = data.filter(
-					(i) => i.api_id && !Array.isArray(i.metadata?.genres)
-				);
+				const missing = data.filter((i) => {
+					if (!i.api_id) return false
+					if (category === "book") return i.metadata?.genres_v !== 2
+					return !(i.metadata?.genres as string[] | undefined)?.length
+				});
 				if (missing.length > 0) {
 					await Promise.all(
 						missing.map(async (item) => {
@@ -72,10 +74,11 @@ export default function MediaList({ category, refreshKey }: Props) {
 								} else if (category === "book") {
 									genres = await fetchBookGenres(item.api_id!)
 								}
+								const extra = category === "book" ? { genres_v: 2 } : {}
 								await updateMediaItem(item.id, {
-									metadata: { ...item.metadata, genres },
+									metadata: { ...item.metadata, genres, ...extra },
 								});
-								item.metadata = { ...item.metadata, genres };
+								item.metadata = { ...item.metadata, genres, ...extra };
 							} catch {
 								// silently skip if fetch fails for an individual item
 							}
