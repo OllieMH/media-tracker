@@ -1,7 +1,5 @@
 import { SearchResult } from '@/types/media'
 
-const BASE_URL = 'https://store.steampowered.com/api/storesearch'
-
 interface SteamSearchItem {
   id: number
   name: string
@@ -18,9 +16,7 @@ function coverUrl(appId: number): string {
 
 export async function searchGames(query: string): Promise<SearchResult[]> {
   if (!query.trim()) return []
-  const res = await fetch(
-    `${BASE_URL}?term=${encodeURIComponent(query)}&l=english&cc=US`
-  )
+  const res = await fetch(`/api/games/search?q=${encodeURIComponent(query)}`)
   if (!res.ok) throw new Error(`Steam error: ${res.status}`)
   const data: SteamSearchResponse = await res.json()
   return data.items.map((item) => ({
