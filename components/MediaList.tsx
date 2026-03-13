@@ -39,6 +39,7 @@ function sortItems(items: MediaItem[], sort: SortOption): MediaItem[] {
 export default function MediaList({ category, refreshKey }: Props) {
 	const [items, setItems] = useState<MediaItem[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const [statusFilter, setStatusFilter] = useState<MediaStatus | "all">("all");
 	const [sort, setSort] = useState<SortOption>("newest");
 	const [tick, setTick] = useState(0);
@@ -48,9 +49,15 @@ export default function MediaList({ category, refreshKey }: Props) {
 	useEffect(() => {
 		async function fetchData() {
 			setLoading(true);
-			const data = await getMediaItems(category);
-			setItems(data);
-			setLoading(false);
+			setError(null);
+			try {
+				const data = await getMediaItems(category);
+				setItems(data);
+			} catch (err) {
+				setError(err instanceof Error ? err.message : "Failed to load items.");
+			} finally {
+				setLoading(false);
+			}
 		}
 		fetchData();
 	}, [category, refreshKey, tick]);
@@ -84,7 +91,30 @@ export default function MediaList({ category, refreshKey }: Props) {
 			</div>
 		);
 	}
-	if (items.length === 0) return <p className="text-sm text-zinc-500">Nothing saved yet.</p>;
+
+	if (error) {
+		return (
+			<div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950">
+				<p className="text-sm font-medium text-red-700 dark:text-red-400">Failed to load your list</p>
+				<p className="mt-1 text-xs text-red-600 opacity-75 dark:text-red-500">{error}</p>
+				<button
+					onClick={triggerRefresh}
+					className="mt-2 text-xs text-red-700 underline hover:no-underline dark:text-red-400"
+				>
+					Try again
+				</button>
+			</div>
+		);
+	}
+
+	if (items.length === 0) {
+		return (
+			<div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-zinc-300 py-16 text-center dark:border-zinc-700">
+				<p className="text-sm font-medium text-zinc-500">Nothing here yet</p>
+				<p className="mt-1 text-xs text-zinc-400">Search above to add your first {category}</p>
+			</div>
+		);
+	}
 
 	return (
 		<div>

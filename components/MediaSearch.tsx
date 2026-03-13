@@ -19,6 +19,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [added, setAdded] = useState<Set<string>>(new Set())
+  const [addError, setAddError] = useState<string | null>(null)
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -35,6 +36,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
   }
 
   async function handleAdd(result: SearchResult) {
+    setAddError(null)
     try {
       await addMediaItem({
         title: result.title,
@@ -49,7 +51,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
       setAdded((prev) => new Set(prev).add(result.id))
       onAdded?.()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to add item')
+      setAddError(err instanceof Error ? err.message : 'Failed to add item')
     }
   }
 
@@ -73,6 +75,7 @@ export default function MediaSearch({ category, searchFn, placeholder, onAdded }
       </form>
 
       {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
+      {addError && <p className="mb-4 text-sm text-red-500">Could not add item: {addError}</p>}
 
       {loading && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
