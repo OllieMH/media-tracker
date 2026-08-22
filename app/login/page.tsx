@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function LoginPage() {
 	const router = useRouter();
+	const { continueAsGuest } = useAuth();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -72,6 +74,22 @@ export default function LoginPage() {
 					Sign up
 				</Link>
 			</p>
+
+			<div className="mt-6 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+				<button
+					type="button"
+					onClick={() => {
+						continueAsGuest();
+						router.push("/");
+					}}
+					className="w-full rounded border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+				>
+					Continue as guest
+				</button>
+				<p className="mt-2 text-xs text-zinc-500">
+					No account needed — your data is saved only in this browser and won&apos;t sync across devices.
+				</p>
+			</div>
 		</div>
 	);
 }

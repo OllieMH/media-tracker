@@ -15,7 +15,7 @@ const links = [
 
 export default function Navigation() {
   const pathname = usePathname()
-  const { user, signOut } = useAuth()
+  const { user, isGuest, signOut } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -44,11 +44,17 @@ export default function Navigation() {
           </div>
 
           {/* Desktop user info */}
-          {user && (
+          {(user || isGuest) && (
             <div className="hidden items-center gap-3 md:flex">
-              <span className="text-xs text-zinc-400">
-                {(user.user_metadata?.display_name as string) || user.email}
-              </span>
+              {isGuest ? (
+                <Link href="/signup" className="text-xs text-forest-400 underline hover:text-forest-300">
+                  Guest — sign up to save
+                </Link>
+              ) : (
+                <span className="text-xs text-zinc-400">
+                  {(user!.user_metadata?.display_name as string) || user!.email}
+                </span>
+              )}
               <Link
                 href="/settings"
                 className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
@@ -63,7 +69,7 @@ export default function Navigation() {
                 onClick={signOut}
                 className="rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
               >
-                Sign out
+                {isGuest ? 'Exit guest mode' : 'Sign out'}
               </button>
             </div>
           )}
@@ -107,12 +113,22 @@ export default function Navigation() {
                 {label}
               </Link>
             ))}
-            {user && (
+            {(user || isGuest) && (
               <>
                 <div className="my-2 border-t border-zinc-100 dark:border-zinc-800" />
-                <span className="px-3 text-xs text-zinc-400">
-                  {(user.user_metadata?.display_name as string) || user.email}
-                </span>
+                {isGuest ? (
+                  <Link
+                    href="/signup"
+                    onClick={() => setMenuOpen(false)}
+                    className="px-3 text-xs text-forest-400 underline hover:text-forest-300"
+                  >
+                    Guest — sign up to save
+                  </Link>
+                ) : (
+                  <span className="px-3 text-xs text-zinc-400">
+                    {(user!.user_metadata?.display_name as string) || user!.email}
+                  </span>
+                )}
                 <Link
                   href="/settings"
                   onClick={() => setMenuOpen(false)}
@@ -128,7 +144,7 @@ export default function Navigation() {
                   onClick={() => { setMenuOpen(false); signOut() }}
                   className="rounded-md px-3 py-2 text-left text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
                 >
-                  Sign out
+                  {isGuest ? 'Exit guest mode' : 'Sign out'}
                 </button>
               </>
             )}

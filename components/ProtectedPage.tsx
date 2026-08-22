@@ -5,17 +5,17 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 
 export default function ProtectedPage({ children }: { children: React.ReactNode }) {
-	const { user, loading } = useAuth();
+	const { user, loading, isGuest } = useAuth();
 	const router = useRouter();
 
 	useEffect(() => {
-		if (!loading && !user) {
+		if (!loading && !user && !isGuest) {
 			router.push("/login");
 		}
-	}, [user, loading, router]);
+	}, [user, loading, isGuest, router]);
 
 	if (loading) return <p className="text-sm text-zinc-500">Loading…</p>;
-	if (!user) return null;
+	if (!user && !isGuest) return null;
 
 	return <>{children}</>;
 }
